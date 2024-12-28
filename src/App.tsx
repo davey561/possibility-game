@@ -1,113 +1,133 @@
-import React, { useState } from "react";
-import "./App.css"; // optional, if you want to add custom CSS
+import React, { useState, useEffect, useRef } from "react";
+import "./App.css";
+import { SAMPLE_PARAGRAPHS, EXTRA_PARAGRAPHS } from "./sampleParagraphs"; // Import the data
 
-type Possibility = {
-  label: string;
-};
-
-export default function App() {
-  // State for the top "Idea" input
+function App() {
   const [idea, setIdea] = useState("");
+  const [rows, setRows] = useState<string[][]>([]);
+  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
 
-  // Each "row" is an array of possibilities.
-  // For simplicity, we seed it with a single row of 3 placeholders.
-  const [rows, setRows] = useState<Possibility[][]>([
-    [
-      { label: "Option A" },
-      { label: "Option B" },
-      { label: "Option C" },
-    ],
-  ]);
+  const rowsContainerRef = useRef<HTMLDivElement | null>(null);
+  const extraIndexRef = useRef(0); // Track the next index for extra options
 
-  // Handler for the top Idea input
-  const handleIdeaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setIdea(e.target.value);
+  const handleKeyDownOnInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && idea.trim()) {
+      setRows([SAMPLE_PARAGRAPHS]); // Start with three options
+      setSelectedIndices([-1]); // No option selected initially
+      e.currentTarget.blur();
+    }
   };
 
-  // When you click the plus button on a possibility,
-  // we append a new row with 3 dummy possibilities below.
-  const handleAddRow = () => {
-    const newRow: Possibility[] = [
-      { label: "Option X" },
-      { label: "Option Y" },
-      { label: "Option Z" },
-    ];
-    setRows(prev => [...prev, newRow]);
+  const createNextRow = () => {
+    setRows((prev) => [...prev, SAMPLE_PARAGRAPHS]);
+    setSelectedIndices((prev) => [...prev, -1]);
   };
+
+  const handleGenerateMoreOptions = () => {
+    setRows((prev) => {
+      const copy = [...prev];
+      const lastRowIndex = copy.length - 1;
+
+      // Fetch the next set of three options
+      const nextOptions = EXTRA_PARAGRAPHS.slice(
+        extraIndexRef.current,
+        extraIndexRef.current + 3
+      );
+
+      // Update the index for the next batch
+      extraIndexRef.current += 3;
+
+      // Cycle back to the beginning if we've exhausted EXTRA_PARAGRAPHS
+      if (extraIndexRef.current >= EXTRA_PARAGRAPHS.length) {
+        extraIndexRef.current = 0;
+      }
+
+      // Append the next options to the last row
+      copy[lastRowIndex] = [...copy[lastRowIndex], ...nextOptions];
+      return copy;
+    });
+  };
+
+  const handleSelectOption = (optionIndex: number) => {
+    setSelectedIndices((prev) => {
+      const copy = [...prev];
+      copy[copy.length - 1] = optionIndex; // Update the selected option for the current row
+      return copy;
+    });
+    createNextRow(); // Add a new row after selecting
+  };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    const lastRowIndex = rows.length - 1;
+
+    if (lastRowIndex < 0) return;
+
+    if (e.key === " ") {
+      e.preventDefault();
+      handleGenerateMoreOptions(); // Space bar generates more options
+    } else if (/^[1-9]$/.test(e.key)) {
+      const optionIndex = parseInt(e.key, 10) - 1;
+      if (optionIndex < rows[lastRowIndex].length) {
+        handleSelectOption(optionIndex); // Select an option via keyboard shortcut
+      }
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [rows]);
+
+  useEffect(() => {
+    if (rowsContainerRef.current) {
+      rowsContainerRef.current.scrollTo({
+        top: rowsContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [rows]);
 
   return (
-    <div style={{ maxWidth: 600, margin: "0 auto", padding: "1rem" }}>
-      <h1>Your Possibility Game</h1>
+    <div className="container">
+      <input
+        type="text"
+        value={idea}
+        onChange={(e) => setIdea(e.target.value)}
+        onKeyDown={handleKeyDownOnInput}
+        placeholder="Type your main idea, press Enter..."
+        className="text-input"
+      />
 
-      {/* Top text input for the initial idea */}
-      <div style={{ marginBottom: "1rem" }}>
-        <label style={{ display: "block", marginBottom: 4 }}>
-          Enter your initial idea:
-        </label>
-        <input
-          type="text"
-          value={idea}
-          onChange={handleIdeaChange}
-          placeholder="Type your main idea here..."
-          style={{
-            width: "100%",
-            padding: "0.5rem",
-            fontSize: "1rem",
-            boxSizing: "border-box",
-          }}
-        />
-      </div>
+      <div className="rows-container" ref={rowsContainerRef}>
+        {rows.map((row, rowIndex) => {
+          const isBottomRow = rowIndex === rows.length - 1;
 
-      {/* Display the user's idea (optional) */}
-      {idea && (
-        <p style={{ fontStyle: "italic" }}>
-          Current Idea: <strong>{idea}</strong>
-        </p>
-      )}
+          return (
+            <div key={rowIndex} className="row">
+              {row.map((paragraph, optIndex) => {
+                const isSelected = selectedIndices[rowIndex] === optIndex;
+                return (
+                  <div
+                    key={optIndex}
+                    className={`option-box ${isSelected ? "highlighted" : ""}`}
+                    onClick={() => isBottomRow && handleSelectOption(optIndex)}
+                  >
+                    {paragraph}
+                  </div>
+                );
+              })}
 
-      {/* Render each row of possibilities */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        {rows.map((row, rowIndex) => (
-          <div
-            key={rowIndex}
-            style={{
-              display: "flex",
-              gap: "1rem",
-              justifyContent: "center",
-            }}
-          >
-            {row.map((possibility, index) => (
-              <div
-                key={index}
-                style={{
-                  border: "1px solid #ccc",
-                  borderRadius: 4,
-                  padding: "1rem",
-                  minWidth: 100,
-                  textAlign: "center",
-                  position: "relative",
-                }}
-              >
-                <div style={{ marginBottom: 8 }}>{possibility.label}</div>
-                {/* Plus button to add a new row below */}
-                <button
-                  onClick={handleAddRow}
-                  style={{
-                    background: "#4caf50",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: 4,
-                    cursor: "pointer",
-                    padding: "0.5rem 0.75rem",
-                  }}
-                >
-                  +
-                </button>
-              </div>
-            ))}
-          </div>
-        ))}
+              {isBottomRow && (
+                <div className="plus-box" onClick={handleGenerateMoreOptions}>
+                  ...
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
+
+export default App;
