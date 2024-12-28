@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    // These two enable the default React import style and JSX
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    // If you use React 17+ with the new JSX transform, use "react-jsx"
+    "jsx": "react-jsx",
+    // Strict type-checking (recommended)
+    "strict": true,
+    // Avoid checking .d.ts from node_modules
+    "skipLibCheck": true,
+    // Ensures consistent casing in imports
+    "forceConsistentCasingInFileNames": true
+  },
+  // Tells TypeScript where to look for source files
+  "include": [
+    "src"
+  ],
+  // (Optional) references if you have multiple TS configs for different parts
+  // "references": [{ "path": "./tsconfig.node.json" }]
+}
