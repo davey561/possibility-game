@@ -54,6 +54,29 @@ function App() {
     createNextRow();
   };
 
+  const handleKeyDown = (e: KeyboardEvent) => {
+    const lastRowIndex = rows.length - 1;
+
+    if (lastRowIndex < 0) return;
+
+    const lastRow = rows[lastRowIndex];
+
+    if (e.key === " ") {
+      e.preventDefault(); // Prevent scrolling when pressing space
+      handleGenerateMoreOptions();
+    } else if (/^[1-3]$/.test(e.key)) {
+      const optionIndex = parseInt(e.key, 10) - 1; // Convert '1', '2', '3' to 0, 1, 2
+      if (optionIndex < lastRow.length) {
+        handleSelectOption(lastRowIndex, optionIndex); // Select the corresponding option
+      }
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [rows]);
+
   return (
     <div className="container">
       <InputBar

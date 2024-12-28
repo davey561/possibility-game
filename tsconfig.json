@@ -20,7 +20,9 @@
     // Avoid checking .d.ts from node_modules
     "skipLibCheck": true,
     // Ensures consistent casing in imports
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist", // Redirect compiled JS files
+    "rootDir": "./src", // Specify where your source files are
   },
   // Tells TypeScript where to look for source files
   "include": [

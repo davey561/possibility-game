@@ -14,7 +14,6 @@ const OptionBox: React.FC<OptionBoxProps> = ({ option, isSelected, onClick }) =>
       onClick={onClick}
     >
       <p>{option.text}</p>
-      <small>{option.timestamp}</small>
     </div>
   );
 };
