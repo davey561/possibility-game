@@ -1,13 +1,14 @@
 import React from "react";
 import OptionBox from "./OptionBox";
+import { Option } from "../types";
 
 interface RowProps {
-  rowIndex: number;
-  options: string[];
-  selectedIndex: number;
-  onSelectOption: (optionIndex: number) => void;
-  onGenerateMoreOptions: () => void;
-}
+    rowIndex: number;
+    options: Option[]; // Use Option instead of string
+    selectedIndex: number;
+    onSelectOption: (optionIndex: number) => void;
+    onGenerateMoreOptions: () => void;
+  }
 
 const Row: React.FC<RowProps> = ({
   options,
@@ -20,7 +21,7 @@ const Row: React.FC<RowProps> = ({
       {options.map((option, optIndex) => (
         <OptionBox
           key={optIndex}
-          text={option}
+          option={option}
           isSelected={selectedIndex === optIndex}
           onClick={() => onSelectOption(optIndex)}
         />

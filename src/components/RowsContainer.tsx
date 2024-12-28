@@ -1,13 +1,14 @@
 import React, { RefObject } from "react";
 import Row from "./Row";
+import { Option } from "../types";
 
 interface RowsContainerProps {
-  rows: string[][];
-  selectedIndices: number[];
-  onSelectOption: (rowIndex: number, optionIndex: number) => void;
-  onGenerateMoreOptions: () => void;
-  containerRef: RefObject<HTMLDivElement>;
-}
+    rows: Option[][]; // Use Option instead of string
+    selectedIndices: number[];
+    onSelectOption: (rowIndex: number, optionIndex: number) => void;
+    onGenerateMoreOptions: () => void;
+    containerRef: React.RefObject<HTMLDivElement>;
+  }
 
 const RowsContainer: React.FC<RowsContainerProps> = ({
   rows,
